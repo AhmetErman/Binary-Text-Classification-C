@@ -96,5 +96,5 @@ int predict(int x[], double W[], int n){
     if(prediction>=0)
         return 1;
     else
-        return 0;
+        return -1;
 }
