@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 
-void toLowerStr(char *p);
 int isLetter(char c);
-int checkDict(char *word);
+int checkDict(char *word, FILE *fin);
 void addDict(FILE *fout,char *word);
 
 int main() {
@@ -19,40 +17,30 @@ int main() {
         printf("Error: Unable to open the file in.\n");
         return 1;
     }
-    FILE *fout = fopen("dictionaryTest.txt", "a");
+    FILE *fout = fopen("dictionary.txt", "a+");
     if (fout == NULL) {
         printf("Error: Unable to open the file out.\n");
         return 1;
     }
 
+
+    // checking a words, then add to the dictionary
     while((letter = fgetc(fin)) != EOF){
+        if(isLetter(letter)){
+            letter = tolower(letter);
+            strncat(str, &letter, 1);
+        }
+        else if(letter == ' '){
+            if( str[0] != 0 && !checkDict(str,fout))
+                addDict(fout, str);
 
-        if( letter == ' '){
-            // write a word
-            while((letter = fgetc(fin)) != EOF){
-                if(isLetter(letter)){
-                    letter = tolower(letter);
-                    strncat(str, &letter, 1);
-                }
-                else if(letter == ' '){
-                    if(!checkDict(str))
-                        addDict(fout, str);
-
-                    str[0] = 0;
-                }
-
-            }
             str[0] = 0;
         }
     }
 
+
     fclose(fin);
     fclose(fout);
-}
-
-// çalıntıdır
-void toLowerStr(char *p){
-    for ( ; *p; ++p) *p = tolower(*p);
 }
 
 int isLetter(char c){
@@ -62,25 +50,16 @@ int isLetter(char c){
 }
 
 // checks Dictionary. if it finds the word returns 1
-int checkDict(char *word){
+int checkDict(char *word, FILE *fin){
     int flag1,isSame;
-    char str[100];
-    FILE *fin;
-    fin = fopen("dictionaryTest.txt", "r");
+    char str[60];
 
-    if (fin == NULL) {
-        printf("Error: Unable to open the file out.\n");
-        return 1;
-    }
-
+    rewind(fin);
     do{
         str[0] = 0;
         flag1 = fscanf(fin,"%s",str);
         isSame = strcmp(str,word);
-        
-    }while(flag1 !=-1 && isSame);// sıkıntı
-
-    fclose(fin);
+    }while(flag1 !=-1 && isSame);
 
     if(isSame == 0)
         return 1;
@@ -88,7 +67,9 @@ int checkDict(char *word){
 }
 
 void addDict(FILE *fout,char *word){
-    strncat(word, "\n", 1);
-    fputs(word, fout);
-    rewind(fout);
+        strncat(word, "\n", 1);
+        fputs(word, fout);
+        rewind(fout);
+
+
 }
