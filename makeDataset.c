@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-//#include <cjson/cJSON.h>
 
 void writeFile(FILE *fin, FILE *fout, char *flag, char buff[]);
 
@@ -17,7 +16,7 @@ int main() {
         printf("Error: Unable to open the file in.\n");
         return 1;
     }
-    FILE *fout = fopen("deneme7.txt", "w");
+    FILE *fout = fopen("dataset.txt", "w");
     if (fout == NULL) {
         printf("Error: Unable to open the file out.\n");
         return 1;
