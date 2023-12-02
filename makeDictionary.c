@@ -11,7 +11,7 @@ int main() {
     char letter, str[50]={0};
 
     // Opening files
-    FILE *fin = fopen("dataset.txt", "r");
+    FILE *fin = fopen("makeDataset.txt", "r");
     if (fin == NULL) {
 
         printf("Error: Unable to open the file in.\n");
@@ -22,7 +22,6 @@ int main() {
         printf("Error: Unable to open the file out.\n");
         return 1;
     }
-
 
     // checking a words, then add to the dictionary
     while((letter = fgetc(fin)) != EOF){
@@ -37,7 +36,6 @@ int main() {
             str[0] = 0;
         }
     }
-
 
     fclose(fin);
     fclose(fout);
@@ -70,6 +68,5 @@ void addDict(FILE *fout,char *word){
         strncat(word, "\n", 1);
         fputs(word, fout);
         rewind(fout);
-
 
 }
