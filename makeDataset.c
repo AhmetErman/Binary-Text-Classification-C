@@ -16,7 +16,7 @@ int main() {
         printf("Error: Unable to open the file in.\n");
         return 1;
     }
-    FILE *fout = fopen("dataset.txt", "w");
+    FILE *fout = fopen("makeDataset.txt", "w");
     if (fout == NULL) {
         printf("Error: Unable to open the file out.\n");
         return 1;
@@ -54,9 +54,10 @@ int main() {
     return 0;
 }
 
-// write text flag to flag2
+// write text flag to end of the text
 void writeFile(FILE *fin, FILE *fout, char *flag, char buff[]){
 
+    int words = 0;
     char *flag2 = NULL;
     flag += 29; //flag needs to be added 29 to reach text
     int i;
@@ -72,8 +73,8 @@ void writeFile(FILE *fin, FILE *fout, char *flag, char buff[]){
             fgets(buff,156,fin);
             flag = buff;
         }
-
-
+        words++;
     }
+
     fputc('\n', fout);
 }
