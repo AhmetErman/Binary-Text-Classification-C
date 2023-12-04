@@ -11,7 +11,7 @@ int main() {
     char letter, str[50]={0};
 
     // Opening files
-    FILE *fin = fopen("makeDataset.txt", "r");
+    FILE *fin = fopen("dataset.txt", "r");
     if (fin == NULL) {
 
         printf("Error: Unable to open the file in.\n");

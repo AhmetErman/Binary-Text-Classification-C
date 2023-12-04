@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#define MAX 100
 
 void writeFile(FILE *fin, FILE *fout, char *flag, char buff[]);
 
@@ -16,7 +17,7 @@ int main() {
         printf("Error: Unable to open the file in.\n");
         return 1;
     }
-    FILE *fout = fopen("makeDataset.txt", "w");
+    FILE *fout = fopen("dataset.txt", "w");
     if (fout == NULL) {
         printf("Error: Unable to open the file out.\n");
         return 1;
@@ -24,7 +25,7 @@ int main() {
 
     //writing on output file (fout)
     a = 0; b = 0; review = 0;
-    while(a<500 || b<500){
+    while(a<MAX || b<MAX){
         if(fgetc(fin) == '{'){
             review++;
 
@@ -33,12 +34,12 @@ int main() {
             i=10; //"\"rating\": ".length()
             rating = *(flag+i);
 
-            if(rating - '0' <= 3 && a <500){
+            if(rating - '0' <= 3 && a <MAX){
                 a++;
                 fputs("-1 ", fout);
                 writeFile(fin, fout, flag, buff);
             }
-            else if(rating - '0' > 3 && b <500){
+            else if(rating - '0' > 3 && b <MAX){
                 b++;
                 fputs("1 ", fout);
                 writeFile(fin, fout, flag, buff);
