@@ -41,13 +41,14 @@ int main() {
     fclose(fout);
 }
 
+//checks the char if it is letter returns 1 else returns 0
 int isLetter(char c){
     if((c >= 'A' && c <= 'Z') || (c >= 'a' && c<= 'z'))
         return 1;
     return 0;
 }
 
-// checks Dictionary. if it finds the word returns 1
+// checks Dictionary. if it finds the word returns 1 else returns 0
 int checkDict(char *word, FILE *fin){
     int flag1,isSame;
     char str[60];
@@ -64,6 +65,7 @@ int checkDict(char *word, FILE *fin){
     return 0;
 }
 
+// appends the word into dictionary.txt
 void addDict(FILE *fout,char *word){
         strncat(word, "\n", 1);
         fputs(word, fout);

@@ -40,6 +40,7 @@ int main() {
     int predictions[TEST_MAX];
     bool dataset[MAX][DICTIONARY];
     bool test_set[TEST_MAX][DICTIONARY];
+    double learning_rate = 0.1;
 
     fillDataset(dataset,TRAIN_SET,MAX);
     fillDataset(test_set,TEST_SET,TEST_MAX);
@@ -47,11 +48,16 @@ int main() {
     fillY(y,TRAIN_SET,MAX);
     fillY(y_test,TEST_SET,TEST_MAX);
 
-    genW(W, 0);
+    genW(W, 0.5);
 
-    //gradient_descent(dataset, test_set, y, y_test, W,0.07,100);
-    stochastic_gradient_descent(dataset, test_set, y, y_test, W,0.1,50);
-    Adam(dataset,test_set, y,y_test, W, 0.5, 10);
+    printf("gradient, eps: %.4f\n",learning_rate);
+    gradient_descent(dataset, test_set, y, y_test, W,learning_rate,20);
+
+//    printf("stochastic, eps: %.4f\n",learning_rate);
+//    stochastic_gradient_descent(dataset, test_set, y, y_test, W,learning_rate,20);
+
+//    printf("Adam, eps: %.4f\n",learning_rate);
+//    Adam(dataset,test_set, y,y_test, W, learning_rate, 20);
 
     return 0;
 }
@@ -79,8 +85,10 @@ void gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[TEST_MAX][DIC
         }
         t_seconds= ((double)(clock()-t))/CLOCKS_PER_SEC; // in seconds
 
-        printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-        //printf("Epoch %d, TEST Loss = %f\n\n", i+1, Loss(test_set, TEST_MAX, y_test, W)); // silebiliriz
+        //printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+        //grafik için print
+        printf("{%d,%.3f,%f,%f},\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+
     }
 }
 
@@ -107,8 +115,9 @@ void stochastic_gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[][
         }
         t_seconds= ((double)(clock()-t))/CLOCKS_PER_SEC; // in seconds
 
-        printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-        //printf("Epoch %d, TEST Loss = %f\n", i+1, Loss(test_set, TEST_MAX, y_test, W));
+        //printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+        //grafik için print
+        printf("{%d,%.3f,%f,%f},\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
     }
 }
 
@@ -144,8 +153,9 @@ void Adam(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], i
         }
 
         t_seconds= ((double)(clock()-t))/CLOCKS_PER_SEC; // in seconds
-        printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-        //printf("Epoch %d, TEST Loss = %f\n", i+1, Loss(test_set, TEST_MAX, y_test, W));
+        //printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+        //grafik için print
+        printf("{%d,%.3f,%f,%f},\n", i, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
     }
 
 }
