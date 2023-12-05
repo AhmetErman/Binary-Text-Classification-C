@@ -1,6 +1,7 @@
 
 *.exe
 test.c
-test.txt
 main.c
 deneme1.c
+Yeni.c
+goodreads_reviews_spoiler_raw.json
