@@ -4,6 +4,7 @@
 
 void writeFile(FILE *fin, FILE *fout, char *flag, char buff[]);
 
+// this program opens raw dataset then writes the important parts into dataset.txt to use our optimization functions.
 int main() {
 
     int a,b,i,review;
@@ -23,7 +24,9 @@ int main() {
         return 1;
     }
 
-    //writing on output file (fout)
+    //every examples starts with '{' symbol. this function first finds '{' symbol
+    //then first checks ratings if it is greater than 3 writes 1. if not writes -1.
+    //then finds the text and writes into dataset.txt.
     a = 0; b = 0; review = 0;
     while(a<MAX || b<MAX){
         if(fgetc(fin) == '{'){
