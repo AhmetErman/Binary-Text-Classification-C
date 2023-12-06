@@ -12,14 +12,15 @@
 #define TEST_SET "test.txt"
 #define TRAIN_SET "train.txt"
 
-double f_x(bool x[], double w[]);
+double f_x(bool x[DICTIONARY], double w[DICTIONARY]);
 void gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], int y_test[], double W[], double learning_rate, int iteration);
 void stochastic_gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], int y_test[], double W[], double learning_rate, int iteration);
 void Adam(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], int y_test[], double W[], double learning_rate, int iteration);
 double Loss(bool dataset[][DICTIONARY], int m, int y[], double W[]);
 void predict(bool test_set[][DICTIONARY], double W[], int predictions[]);
 void compare(int predictions[], int y_test[]);
-void genW(double W[], float value);
+void autoplay(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], int y_test[], double learning_rate);
+void genW(double W[], double value);
 void fillY(int y[],char *filename, int m);
 void fillDataset(bool dataset[][DICTIONARY],char *filename, int m);
 
@@ -29,8 +30,8 @@ int getWord(char *str, FILE *fin);
 int countWords(FILE *fout);
 int countOnes(int dataset[DICTIONARY]);
 int checkDict(char *word, FILE *fin);
-void printArr(int arr[]);
-void printMat(int dataset[MAX][DICTIONARY]);
+void printResults(int i, double t_seconds,bool dataset[MAX][DICTIONARY],int y[DICTIONARY],int y_test[TEST_MAX],double W[DICTIONARY],bool test_set[TEST_MAX][DICTIONARY],int mod);
+
 
 
 int main() {
@@ -40,7 +41,7 @@ int main() {
     int predictions[TEST_MAX];
     bool dataset[MAX][DICTIONARY];
     bool test_set[TEST_MAX][DICTIONARY];
-    double learning_rate = 0.1;
+    double learning_rate = 0.5;
 
     fillDataset(dataset,TRAIN_SET,MAX);
     fillDataset(test_set,TEST_SET,TEST_MAX);
@@ -48,35 +49,42 @@ int main() {
     fillY(y,TRAIN_SET,MAX);
     fillY(y_test,TEST_SET,TEST_MAX);
 
-    genW(W, 0.5);
+    genW(W, 0.2);
+
+//    autoplay(dataset, test_set, y, y_test,learning_rate);
 
     printf("gradient, eps: %.4f\n",learning_rate);
-    gradient_descent(dataset, test_set, y, y_test, W,learning_rate,20);
+    gradient_descent(dataset, test_set, y, y_test, W,learning_rate,500);
 
-//    printf("stochastic, eps: %.4f\n",learning_rate);
-//    stochastic_gradient_descent(dataset, test_set, y, y_test, W,learning_rate,20);
+    printf("stochastic, eps: %.4f\n",learning_rate);
+    stochastic_gradient_descent(dataset, test_set, y, y_test, W,learning_rate,2000);
+//
+    printf("Adam, eps: %.4f\n",learning_rate);
+    Adam(dataset,test_set, y,y_test, W, learning_rate, 100);
 
-//    printf("Adam, eps: %.4f\n",learning_rate);
-//    Adam(dataset,test_set, y,y_test, W, learning_rate, 20);
-
+//    predict(test_set, W, predictions);
+//    compare(predictions, y_test);
     return 0;
 }
 
 void gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[TEST_MAX][DICTIONARY], int y[], int y_test[], double W[], double learning_rate, int iteration){
 
     int i=0, j, k;
-    double f_der=0, y_hat;
+    double f_der=0, y_hat[MAX];
     clock_t t;
     double t_seconds;
 
     t = clock();
     for(i= 0; i<iteration;i++) {
+        for(k=0;k<MAX;k++){
+            y_hat[k] = f_x(dataset[k], W);
+        }
+
         for (j = 0; j < DICTIONARY; j++) {
 
             for (k = 0; k < MAX; k++) {
 
-                y_hat = f_x(dataset[k], W);
-                f_der += (y_hat - y[k]) * dataset[k][j];//gradyan
+                f_der += (y_hat[k] - y[k]) * ((1 -y_hat[k]*y_hat[k])*dataset[k][j]);//gradyan
             }
             f_der /= MAX;
 
@@ -85,10 +93,7 @@ void gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[TEST_MAX][DIC
         }
         t_seconds= ((double)(clock()-t))/CLOCKS_PER_SEC; // in seconds
 
-        //printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-        //grafik için print
-        printf("{%d,%.3f,%f,%f},\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-
+        printResults(i,t_seconds,dataset,y,y_test,W,test_set,1);
     }
 }
 
@@ -98,6 +103,10 @@ void stochastic_gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[][
     double f_der, y_hat;
     clock_t t;
     double t_seconds;
+    FILE *fout = fopen("results.txt","w");
+    if(fout == NULL){
+        printf("Error: Unable to open the file in.\n");
+    }
 
     srand(time(NULL));
 
@@ -110,35 +119,37 @@ void stochastic_gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[][
 
         for(j=0;j<DICTIONARY;j++){
 
-            f_der = (y_hat - y[random]) * dataset[random][j];
+            f_der = (y_hat - y[random]) * ((1 -y_hat*y_hat)*dataset[random][j]);
             W[j] = W[j] - learning_rate * f_der;
         }
         t_seconds= ((double)(clock()-t))/CLOCKS_PER_SEC; // in seconds
 
-        //printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-        //grafik için print
-        printf("{%d,%.3f,%f,%f},\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+        printResults(i,t_seconds,dataset,y,y_test,W,test_set,2);
     }
 }
 
 void Adam(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], int y_test[], double W[], double learning_rate, int iteration){
 
-    int i=0, j, k;
-    double f_der=0, y_hat, B1=0.9, B2=0.99, epsilon = 0.0001;
+    int i, j, k;
+    double f_der=0, y_hat[MAX], B1=0.5, B2=0.7, epsilon = 0.0001;
     double mt[DICTIONARY] = {0};
     double vt[DICTIONARY] = {0};
     clock_t t;
     double t_seconds;
 
-    while(i<iteration) {
-        i++;
+    t = clock();
+    for(i=1;i<iteration+1;i++){
+
+        for(k=0;k<MAX;k++){
+            y_hat[k] = f_x(dataset[k], W);
+
+        }
 
         for (j = 0; j < DICTIONARY; j++) {
+
             for (k = 0; k < MAX; k++) {
 
-                y_hat= f_x(dataset[k], W);
-
-                f_der += (y_hat - y[k]) * dataset[k][j];
+                f_der += (y_hat[k]- y[k]) * ((1 -y_hat[k]*y_hat[k])*dataset[k][j]);
             }
             f_der /= MAX;
 
@@ -153,14 +164,12 @@ void Adam(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], i
         }
 
         t_seconds= ((double)(clock()-t))/CLOCKS_PER_SEC; // in seconds
-        //printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
-        //grafik için print
-        printf("{%d,%.3f,%f,%f},\n", i, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+        printResults(i,t_seconds,dataset,y,y_test,W,test_set,3);
     }
 
 }
 
-double f_x(bool x[], double W[]){
+double f_x(bool x[DICTIONARY], double W[DICTIONARY]){
 
     double WX = 0, a;
     int i;
@@ -206,14 +215,37 @@ void compare(int predictions[], int y_test[]){
     int i;
     float accuracy = 0;
     for(i=0;i<TEST_MAX;i++){
-        printf("%d. Real Value = %d, Estimated Value = %d\n", i+1, y_test[i], predictions[i]);
-        accuracy +=1;
+//        printf("%d. Real Value = %d, Estimated Value = %d\n", i+1, y_test[i], predictions[i]);
+        if(y_test[i] == predictions[i])
+            accuracy++;
     }
     accuracy = (accuracy/40)*100;
     printf("Accuracy = %f percent\n", accuracy);
 }
 
-void genW(double W[], float value){
+void autoplay(bool dataset[MAX][DICTIONARY], bool test_set[][DICTIONARY], int y[], int y_test[], double learning_rate){
+    int i,predictions[TEST_MAX];
+    double num = -0.2, W[DICTIONARY];
+
+    for(i= 0; i < 5; i++){
+
+        genW(W, num);
+        printf("gradient, w: %.3f\n",num);
+        gradient_descent(dataset, test_set, y, y_test, W,learning_rate,500);
+
+        genW(W, num);
+        printf("stochastic, w: %.3f\n",num);
+        stochastic_gradient_descent(dataset, test_set, y, y_test, W,learning_rate,1000);
+
+        genW(W, num);
+        printf("Adam, w: %.3f\n",num);
+        Adam(dataset,test_set, y,y_test, W, learning_rate, 100);
+
+        num += 0.1;
+    }
+}
+
+void genW(double W[], double value){
 
     int i;
     for(i=0;i<DICTIONARY;i++){
@@ -260,6 +292,7 @@ void fillY(int y[],char *filename, int m){
     fclose(fin);
 }
 
+// checks every word if they are in dictionary
 void fillDataset(bool dataset[][DICTIONARY],char *filename, int m){
     int i,j,n;//i: cumleler
     char str[60];
@@ -287,12 +320,14 @@ void fillDataset(bool dataset[][DICTIONARY],char *filename, int m){
     fclose(fdict);
 }
 
+//checks if it is letter
 int isLetter(char c){
     if((c >= 'A' && c <= 'Z') || (c >= 'a' && c<= 'z'))
         return 1;
     return 0;
 }
 
+// append a letter to str
 int appendStr(char* str,char letter){
 
     if(isLetter(letter)){
@@ -303,6 +338,7 @@ int appendStr(char* str,char letter){
     return 0;
 }
 
+// appends every letter until ' ' or '\n' chars. If it is end of the text returns 0 if not returns 1
 int getWord(char *str, FILE *fin){
     int flag =1;
     char letter;
@@ -327,6 +363,7 @@ int getWord(char *str, FILE *fin){
     return 1;
 }
 
+// counts how many words in a text
 int countWords(FILE *fout){
     fpos_t position;
     int words=0;
@@ -340,6 +377,7 @@ int countWords(FILE *fout){
     return words;
 }
 
+//counts 1 numbers to see how many word are from the dictionary
 int countOnes(int dataset[DICTIONARY]){
     int i,count=0;
     for(i = 0; i < DICTIONARY; i++){
@@ -349,6 +387,7 @@ int countOnes(int dataset[DICTIONARY]){
     return count;
 }
 
+//Checks the dictionary if the word is in the dictionary returns the position of the word if not return 0
 int checkDict(char *word, FILE *fin){
     int flag1,isSame,n=0;
     char str[60];
@@ -366,21 +405,34 @@ int checkDict(char *word, FILE *fin){
     return 0;
 }
 
-void printArr(int arr[]){
-    int i;
+// prints every 10 iteration on terminal and every iteration on results.txt file.
+void printResults(int i, double t_seconds,bool dataset[MAX][DICTIONARY],int y[DICTIONARY],int y_test[TEST_MAX],double W[DICTIONARY],bool test_set[TEST_MAX][DICTIONARY],int mod){
+    int predictions[TEST_MAX];
+    FILE *fout = fopen("results.txt","a");
 
-    for (i = 0; i < MAX; i++) {
-        printf("%d ",arr[i]);
+    if((i+1)%10 == 0){
+        printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
 
+        predict(test_set, W, predictions);
+        compare(predictions, y_test);
     }
-}
-void printMat(int dataset[MAX][DICTIONARY]){
-    int i,j;
-
-    for (i = 0; i < MAX; i++) {
-        for (j = 0; j < sizeof(dataset[i])/sizeof(int); j++) {
-            printf("%d ",dataset[i][j]);
+    else if(i==1){
+        if(mod == 1){
+            printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+            fprintf(fout, "\n%s %.2f\n","Gradient, W =",W[0]);
         }
-        printf("\n");
+        else if(mod == 2){
+            printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+            fprintf(fout, "\n%s %.2f\n","Stocastic, W =",W[0]);
+        }
+        else if(mod == 3){
+            printf("Epoch %d,Time %.3f : Loss = %f, TEST Loss = %f\n\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+            fprintf(fout, "\n%s %.2f\n","ADAM, W =",W[0]);
+        }
     }
+
+    //grafik için print
+    fprintf(fout,"{%d,%.3f,%f,%f},\n", i+1, t_seconds, Loss(dataset, MAX, y, W), Loss(test_set, TEST_MAX, y_test, W));
+
+    fclose(fout);
 }
