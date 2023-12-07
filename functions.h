@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
@@ -33,39 +34,6 @@ int checkDict(char *word, FILE *fin);
 void printResults(int i, double t_seconds,bool dataset[MAX][DICTIONARY],int y[DICTIONARY],int y_test[TEST_MAX],double W[DICTIONARY],bool test_set[TEST_MAX][DICTIONARY],int mod);
 
 
-
-int main() {
-    int y[MAX];
-    int y_test[TEST_MAX];
-    double W[DICTIONARY];
-    int predictions[TEST_MAX];
-    bool dataset[MAX][DICTIONARY];
-    bool test_set[TEST_MAX][DICTIONARY];
-    double learning_rate = 0.6;
-
-    fillDataset(dataset,TRAIN_SET,MAX);
-    fillDataset(test_set,TEST_SET,TEST_MAX);
-
-    fillY(y,TRAIN_SET,MAX);
-    fillY(y_test,TEST_SET,TEST_MAX);
-
-    //genW(W, 0.2);
-
-    autoplay(dataset, test_set, y, y_test,learning_rate);
-
-//    printf("gradient, eps: %.4f\n",learning_rate);
-//    gradient_descent(dataset, test_set, y, y_test, W,learning_rate,500);
-//
-//    printf("stochastic, eps: %.4f\n",learning_rate);
-//    stochastic_gradient_descent(dataset, test_set, y, y_test, W,learning_rate,2000);
-
-//    printf("Adam, eps: %.4f\n",learning_rate);
-//    Adam(dataset,test_set, y,y_test, W, learning_rate, 100);
-
-//    predict(test_set, W, predictions);
-//    compare(predictions, y_test);
-    return 0;
-}
 
 //GD optimization algorithm
 void gradient_descent(bool dataset[MAX][DICTIONARY], bool test_set[TEST_MAX][DICTIONARY], int y[], int y_test[], double W[], double learning_rate, int iteration){
