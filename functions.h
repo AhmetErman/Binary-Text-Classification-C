@@ -1,8 +1,4 @@
 
-//#ifndef DIFERANSIYELDENKLEMLERODEV1_FUNCTIONS_H
-//#define DIFERANSIYELDENKLEMLERODEV1_FUNCTIONS_H
-//
-//#endif //DIFERANSIYELDENKLEMLERODEV1_FUNCTIONS_H
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>

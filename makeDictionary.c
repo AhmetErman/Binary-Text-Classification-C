@@ -11,12 +11,20 @@ int main() {
     char letter, str[50]={0};
 
     // Opening files
-    FILE *fin = fopen("dataset.txt", "r");
+    FILE *fin = fopen("train.txt", "r");
     if (fin == NULL) {
 
         printf("Error: Unable to open the file in.\n");
         return 1;
     }
+    //deleting old file
+    FILE *file = fopen("dictionary.txt", "w");
+    if (file == NULL) {
+        printf("Error: Unable to open the file out.\n");
+        return 1;
+    }
+    fclose(file);
+    //
     FILE *fout = fopen("dictionary.txt", "a+");
     if (fout == NULL) {
         printf("Error: Unable to open the file out.\n");

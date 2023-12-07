@@ -58,8 +58,8 @@ int mainMenu(int y[MAX],int y_test[TEST_MAX],bool dataset[MAX][DICTIONARY],bool 
 int main() {
     int num =1;
     int y[MAX],y_test[TEST_MAX];
-    bool dataset[MAX][DICTIONARY];
-    bool test_set[TEST_MAX][DICTIONARY];
+    bool dataset[MAX][DICTIONARY] = {0};
+    bool test_set[TEST_MAX][DICTIONARY] = {0};
 
     printf("Loading...\n");
 
